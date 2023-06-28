@@ -1,0 +1,19 @@
+---
+- name: Change password for user on multiple servers
+  hosts: all
+  become: true
+
+  vars_prompt:
+    - name: "username"
+      prompt: "Enter the username whose password you want to change"
+    - name: "new_password"
+      prompt: "Enter the new password for the user"
+      private: true
+
+  tasks:
+    - name: Set new password for user
+      user:
+        name: "{{ username }}"
+        password: "{{ new_password | password_hash('sha512') }}"
+        update_password: always
+

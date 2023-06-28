@@ -1,0 +1,21 @@
+---
+- hosts: "{{ hostname }}"
+  become: yes
+  become_method: sudo 
+  tasks:
+    - name: Delete user 
+      user: 
+        name: "{{ username }}"
+        state: absent
+        remove: yes
+
+  vars_prompt:
+    - name: username
+      prompt: Please specify username
+      private: no
+
+    - name: hostname
+      prompt: Please specify hostname(s) or group(s)
+      private: no
+
+

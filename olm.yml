@@ -1,0 +1,14 @@
+- name: Register with Spacewalk
+  hosts: DB-test
+  tasks:
+    - name: Check Oracle Linux version
+      shell: cat /etc/oracle-release | awk '{print $3}' | cut -d '.' -f 1
+      register: ol_version
+
+    - name: Register with Spacewalk for Oracle Linux 7
+      shell: rhnreg_ks --serverUrl=http://spacewalk.guavapay.com/XMLRPC --activationkey=1-oraclelinux7-x86_64 --force
+      when: ol_version.stdout == "7"
+    
+    - name: Register with Spacewalk for Oracle Linux 8
+      shell: rhnreg_ks --serverUrl=http://spacewalk.guavapay.com/XMLRPC --activationkey=1-oraclelinux8-x86_64 --force
+      when: ol_version.stdout == "8"

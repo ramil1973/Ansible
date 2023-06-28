@@ -1,0 +1,11 @@
+- name: Update sshd_config
+  hosts: PCI
+  become: yes
+  tasks:
+    - name: Set PermitUserEnvironment no
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitUserEnvironment'
+        line: 'PermitUserEnvironment no'
+        state: present
+        backup: yes

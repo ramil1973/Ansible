@@ -1,0 +1,45 @@
+---
+- hosts: "{{ systems }}"
+  become: yes
+  tasks: 
+    - name: get AllowUsers list
+      shell: grep "^AllowUsers" /etc/ssh/sshd_config
+      register: allowuserslist
+      ignore_errors: True
+  
+  
+    - set_fact:
+        users: '{{ allowuserslist.stdout.split(" ")}}'
+
+
+    - name: fail when sshd_config does not contain AllowUsers
+      fail: 
+        msg:  sshd_config does not contain AllowUsers
+      when: allowuserslist.rc != 0
+
+    - name: fail when user already got access
+      fail: 
+        msg: user already got access to the host
+      when: 'username in users'
+     
+    - name: Add user to AllowUsers in sshd config
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^AllowUsers'
+        line: '{{ allowuserslist.stdout }} {{ username }}'
+      notify: sshd reload
+
+  vars_prompt:
+    - name: systems
+      prompt: Please specify system or group name
+      private: no
+   
+    - name: username
+      prompt: Please specify username
+      private: no  
+   
+  handlers:
+    - name: sshd reload
+      service: 
+        name: sshd
+        state: reloaded

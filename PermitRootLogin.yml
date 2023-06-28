@@ -1,0 +1,15 @@
+---
+- name: Change Permit root loin
+  hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: change line
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^PermitRootLogin '
+      line: 'PermitRootLogin no'
+  - name: restart sshd service
+    service:
+      name: sshd
+      state: restarted

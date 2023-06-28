@@ -1,0 +1,22 @@
+#Выключить селинукс
+#Добавить строчку в /etc/rsyslog.conf
+#Перезагрузить rsyslog
+
+---
+- name: Add server to splunk
+  hosts: "{{ systems }}"
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Add remote server to rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        line: "*.* @10.10.55.55:514"
+    - name: restart rsyslog service
+      service:
+        name: rsyslog
+        state: restarted    
+  vars_prompt:
+    - name: systems
+      prompt: "Please specify system or group names"
+      private: no

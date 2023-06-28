@@ -1,0 +1,71 @@
+---
+- hosts: "{{ systems }}"
+  become: yes
+  tasks:
+    - name: add dns record to hosts file
+      lineinfile:
+        path: /etc/hosts
+        regexp: 'spacewalk$'
+        line: 10.10.55.220 spacewalk.gps.local spacewalk
+    - name: install wget
+      yum:
+        name: wget
+        state: latest    
+
+    - name: Download certificate
+      command: wget https://spacewalk.gps.local/pub/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm --no-check-certificate
+
+      # - name: Import trusted SSL Cert
+      #  yum:
+              # name: http://10.10.55.220/pub/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm 
+        #     state: present
+    - name: copy
+      copy:
+        src: rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm
+        dest: /tmp/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm 
+    - name: rpm install
+      command: rpm -Uvh /tmp/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm   
+       
+        # - name: import GPG Key
+      #   rpm_key:
+              # key: http://10.10.55.220/pub/RPM-GPG-KEY-redhat-release
+        #        state: present
+        #- name: Import trusted SSL Cert
+      # yum:
+              # name: /tmp/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm
+        #      state: present 
+
+    - name: add CentOS 7 system(s) to Spacewalk
+      rhn_register:
+        state: present
+        activationkey: 1-centos7
+        sslcacert: /usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT
+        server_url: https://10.10.55.220/XMLRPC
+      when:
+        - ansible_distribution  == "CentOS"
+        - ansible_distribution_major_version == "7"
+
+    - name: add OracleLinux system(s) to Spacewalk
+      rhn_register:
+        state: present
+        activationkey: 1-ol8
+        sslcacert: /usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT
+        server_url: https://10.10.55.220/XMLRPC
+      when:
+        - ansible_distribution  == "OracleLinux"
+        - ansible_distribution_major_version == "8"
+          
+    - name: add OracleLinux system(s) to Spacewalk
+      rhn_register:
+        state: present
+        activationkey: 1-ol7
+        sslcacert: /usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT
+        server_url: https://10.10.55.220/XMLRPC
+      when:
+        - ansible_distribution  == "OracleLinux"
+        - ansible_distribution_major_version == "7" 
+
+  vars_prompt:
+    name: systems
+    prompt: Please write system or group name(s)
+    private: false

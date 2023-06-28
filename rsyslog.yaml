@@ -1,0 +1,9 @@
+- name: Add FileCreateMode to rsyslog.conf
+  hosts: PCI
+  become: true
+  tasks:
+    - name: Add FileCreateMode to rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        line: '$FileCreateMode 0640'
+

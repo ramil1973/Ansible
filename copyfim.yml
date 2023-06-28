@@ -1,0 +1,19 @@
+---
+## This playbook installs and configures AD authentication
+
+- name: Copy clamav scripts to remote machines
+  hosts: "{{ systems }}"
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: example copying file with owner and permissions
+    copy:
+      src: /home/ansible_lc/clamscan_daily
+      dest: /usr/local/clamav/script/clamscan_daily
+
+  vars_prompt:
+    - name: systems
+      prompt: "Please specify system or group names"
+      private: no      
+

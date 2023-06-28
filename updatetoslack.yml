@@ -1,0 +1,33 @@
+---
+- name: Check for updates and notify
+  become: yes
+  become_method: sudo
+  hosts: venture
+  gather_facts: no
+
+  tasks:
+  - name: Gather facts
+    setup:
+
+  - name: Check for updates
+    shell: yum check-update
+    register: update_check
+    failed_when: False
+
+  - name: Notify about new updates
+    debug:
+      msg: "There are new updates available on {{ inventory_hostname }}."
+    when: update_check.stdout != ''
+    
+  - name: Debug output
+    debug:
+      msg: "Update check output: {{ update_check.stdout }}"
+    when: update_check.stdout != ''
+
+  handlers:
+  - name: New updates available
+    telegram:
+      api_key: 5855162099:AAF_E_jP-jF2pN7CC5-58Y3Kp2GY--gLOPw
+      chat_id: 1048138257
+      text: "There are new updates available on {{ inventory_hostname }}. Please run yum update to install."
+

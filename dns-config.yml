@@ -1,0 +1,38 @@
+---
+- hosts: "{{ hostname }}"
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Get all interfaces config file name
+      shell:
+        cmd:  'ls  /etc/sysconfig/network-scripts/ | grep ifcfg | grep -v ifcfg-lo'
+      register: ifname
+
+    - debug:
+        msg: "{{ ifname.stdout }}"
+        
+    - name: Remove old DNS server on resolv.conf
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: "^nameserver"
+        state: absent
+
+    - name: Add new DNS server on resolv.conf
+      lineinfile:
+        path: /etc/resolv.conf
+        state: present
+        line: "nameserver 10.10.55.22\nnameserver 10.10.55.21"
+
+    - name: Change ifcfg file
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/{{ ifname.stdout}}
+        regexp: "{{ item.key }}"
+        line: "{{ item.value }}"
+      with_items:
+        - { key: "DNS1", value: "DNS1=10.10.55.22"}
+        - { key: "DNS2", value: "DNS2=10.10.55.21"}
+
+  vars_prompt:
+    name: hostname
+    prompt: Please specify host or group name(s)
+    private: no

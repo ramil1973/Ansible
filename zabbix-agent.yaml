@@ -1,0 +1,12 @@
+---
+- hosts: "{{ systems }}"
+  become: yes
+  become_method: sudo
+  roles:
+    - zabbix_agent
+
+  vars_prompt:
+    - name: systems
+      prompt: "Please write hosts or groupname"
+      private: no
+

@@ -1,0 +1,11 @@
+---
+ - hosts: test-svfe
+   tasks: 
+          - name: Copy issue.net to /etc/issue.net
+            copy:
+                  src: /etc/issue.net
+                  dest: /etc/issue
+#          - name: Copy issue.net to /etc/issue
+#            copy:
+#                 src: issue.net
+#                 dest: /etc/issue

@@ -1,0 +1,44 @@
+---
+- hosts: "{{ hostname }}"
+  become: yes
+  become_method: sudo 
+  tasks:
+    - name: Asign userlist to variable on RHEL 6
+      command: awk -F ":" '($3>=500) {print $1}' /etc/passwd
+      when: 
+        - ansible_distribution  == "RedHat"
+        - ansible_distribution_major_version == "6"
+      register: userlist6
+
+    - debug:
+        msg: "{{ userlist6 }}"
+
+    - name: Copy userlist to file
+      become: no
+      local_action: copy content="{{ userlist6.stdout_lines }}" dest=user_list/{{ inventory_hostname }}
+      when: 
+        - ansible_distribution  == "RedHat"
+        - ansible_distribution_major_version == "6"
+
+    - name: Asign userlist to variable
+      command: awk -F ":" '($3>=1000) {print $1}' /etc/passwd
+      when: 
+        - ansible_distribution  == "RedHat"
+        - ansible_distribution_major_version == "7"
+      register: userlist7
+
+
+    - debug:
+        msg: "{{ userlist7 }}"
+
+    - name: Copy userlist to file
+      become: no
+      local_action: copy content="{{ userlist7.stdout_lines }}" dest=user_list/{{ inventory_hostname }}
+      when: 
+        - ansible_distribution  == "RedHat"
+        - ansible_distribution_major_version == "7"
+
+  vars_prompt:
+    - name: hostname
+      prompt: Enter host or group name
+      private: no 

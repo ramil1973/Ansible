@@ -1,0 +1,7 @@
+- name: Check for updates
+  hosts: venture
+  tasks:
+    - name: Show list of upgrades
+      become: yes
+      yum:
+        list: updates

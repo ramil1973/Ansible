@@ -1,0 +1,13 @@
+---
+# indclude the type file for RHEL 8 type machines
+
+- hosts: "{{ systems }}"
+  become: yes
+  become_method: sudo
+  ignore_errors: yes
+  roles:
+    - cis_security
+  vars_prompt:
+  - name: systems
+    prompt: "Please write hosts or groupname"
+    private: no

@@ -1,0 +1,58 @@
+---
+- hosts: "{{systems}}"
+
+  become: true
+  tasks:
+    - name: Create /etc/panw folder and give root permissions to all recursive folder
+      file:
+        path: /etc/panw
+        state: directory
+        recurse: yes
+        mode: u=rwx,g=rwx,o=rwx
+                                                                            
+    - name: Copy files from /home/ansible_lc/Linux_Agents_sh/ to /etc/panw/
+      copy:
+        src: /home/ansible_lc/Linux_Agents_sh/
+        dest: /etc/panw/
+        owner: root
+        group: root
+        mode: '0644'
+                                                                                     
+    - name: Download cortex-xdr-agent.zip
+      get_url:
+        url: https://docs.paloaltonetworks.com/content/dam/techdocs/en_US/zip/cortex-xdr/cortex-xdr-agent.zip
+        dest: /etc/panw/
+        mode: '0644'
+
+    - name: Unzip cortex-xdr-agent.zip
+      unarchive:
+        src: /etc/panw/cortex-xdr-agent.zip
+        dest: /etc/panw/
+        remote_src: no
+
+    - name: Import cortex-xdr-agent.asc
+      shell: rpm --import /etc/panw/cortex-xdr-agent.asc
+
+    - name: Make cortex-7.9.0.82606.sh executable
+      file:
+        path: /etc/panw/cortex-7.9.0.82606.sh
+        mode: '0755'
+    - name: Modify cortex-7.9.0.82606.sh to use /opt as the default tmp directory
+      become: true
+      lineinfile:
+        path: /etc/panw/cortex-7.9.0.82606.sh
+        regexp: '^TMPROOT='
+        line: 'TMPROOT=${TMPDIR:=/opt}'
+    - name: Run cortex-7.9.0.82606.sh
+      become: true
+      shell: /etc/panw/cortex-7.9.0.82606.sh
+  vars_prompt:
+       - name: systems
+         prompt: "Please specify system or group names"
+         private: no
+
+                                               
+      #  vars_prompt:
+      # - name: systems
+      #prompt: "Please write hosts or groupname"
+      #private: no                                         
